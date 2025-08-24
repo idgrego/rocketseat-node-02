@@ -1,4 +1,4 @@
-import { env } from '../enviroments/env-data.js'
+import { env } from './env-data.js'
 import { knex } from 'knex'
 
 let auxDbContext = knex({})
