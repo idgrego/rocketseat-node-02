@@ -1,9 +1,9 @@
 import { env } from './env-data.js'
-import { knex } from 'knex'
+import knex from 'knex'
 
-let auxDbContext = knex({})
+let auxDbContext: knex.Knex | null = null
 
-switch (process.env.NODE_ENV) {
+switch (env.NODE_ENV) {
   case 'development':
     auxDbContext = knex({
       client: 'sqlite3',
@@ -25,7 +25,7 @@ switch (process.env.NODE_ENV) {
     break
 
   default:
-    break
+    throw new Error(`Not implemented dbContext for ${env.NODE_ENV} environment`)
 }
 
 export const dbContext = auxDbContext
