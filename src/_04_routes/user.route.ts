@@ -4,11 +4,12 @@ import { Login } from '../_02_models/login.model.js'
 import { User } from '../_02_models/user.model.js'
 import { randomUUID } from 'crypto'
 import { mustBeUnautheticated } from '../_03_middlewares/must-be-unauthenticated.js'
+import { authenticationisRequired } from '../_03_middlewares/authentication-is-required.js'
 
 
 export async function userRoutes(app: FastifyInstance) {
     app.post('/login', async (request: FastifyRequest, response: FastifyReply) => {
-        const { email, pwd } = Login.schema.parse(request.params)
+        const { email, pwd } = Login.schema.parse(request.body)
         const user = await dbContext(User.table).where({'email': email, 'pwd': pwd}).select().first()
 
         if (user) {
@@ -45,5 +46,10 @@ export async function userRoutes(app: FastifyInstance) {
         if (user) return response.status(409).send({ error: 'The e-mail is already in use.' })
         await dbContext(User.table).insert(newUser.data)
         return response.status(201).send({ message: 'Register has been done' })
+    })
+
+    app.get('/users', { preHandler: [authenticationisRequired] }, async (request: FastifyRequest, response: FastifyReply) => {
+        const users = await dbContext(User.table).select()
+        return { users }
     })
 }
