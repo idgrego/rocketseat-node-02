@@ -15,7 +15,7 @@ export class Meal {
   readonly #item: IMeal
   public get data() { return this.#item }
 
-  public id() { return this.#item.id }
+  public get id() { return this.#item.id }
 
   public get userId() { return this.#item.userId }
   public set userId(v: string) { this.#item.userId = v }
@@ -56,7 +56,7 @@ export class Meal {
         name: z.string(),
         description: z.string(),
         belongDiet: z.boolean(),
-        date: z.date()
+        date: z.string().default(new Date().toISOString())
       })  
     }
     return this.#schema

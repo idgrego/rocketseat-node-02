@@ -14,7 +14,7 @@ export class User {
   readonly #item: IUser
   public get data() { return this.#item }
 
-  public id() { return this.#item.id }
+  public get id() { return this.#item.id }
 
   public get name() { return this.#item.name }
   public set name(v: string) { this.#item.name = v }
@@ -50,7 +50,7 @@ export class User {
         name: z.string(),
         email: z.email(),
         pwd: z.string(),
-        sessionId: z.uuid().nullable(),
+        sessionId: z.uuid().nullable().default(null),
       })  
     }
     return this.#schema
