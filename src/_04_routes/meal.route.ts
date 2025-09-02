@@ -8,6 +8,48 @@ export async function mealRoutes(app: FastifyInstance) {
 
     app.addHook('preHandler', authenticationisRequired)
 
+    app.get('/metrics', async (request: FastifyRequest, response: FastifyReply) => {
+        const { userId } = z.object({ userId: z.uuid() }).parse(request.headers)
+        
+        const meals = await dbContext(Meal.table).where('userId', userId).orderBy('date').select() || []
+        const total = meals.length
+        const onDiet = !total ? 0 : await dbContext(Meal.table).where({'userId': userId, 'belongDiet': 1}).count()
+        const offDiet = !total ? 0 : await dbContext(Meal.table).where({'userId': userId, 'belongDiet': 0}).count()
+        
+        type BestSequence = {
+            start: Date;
+            end: Date;
+            amount: number;
+        };
+
+        let bestSequency: BestSequence | null = null
+        let auxSequency: BestSequence | null = null
+
+        if (total) {
+            const aux: BestSequence[] = []
+            meals.forEach((i, idx) => {
+                    if (i.belongDiet) {
+                        // na dieta
+                        if(!auxSequency) 
+                            auxSequency = { start: i.date, end: i.date, amount: 1 }
+                        else {
+                            auxSequency.end = i.date
+                            auxSequency.amount++
+                        }
+                    } else {
+                        // fora da dieta
+                        if (auxSequency) {
+                            if ((bestSequency?.amount || 0) < auxSequency.amount)
+                                bestSequency = auxSequency
+                        }
+                        auxSequency = null
+                    }
+                });
+        }
+        
+        return { total, onDiet, offDiet, bestSequency }
+    })
+
     app.get('/', async (request: FastifyRequest, response: FastifyReply) => {
         const { userId } = z.object({ userId: z.uuid() }).parse(request.headers)
         const meals = await dbContext(Meal.table).where('userId', userId).select()
