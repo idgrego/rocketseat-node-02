@@ -1,6 +1,8 @@
 import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify'
-import { dbContext } from '../_01_infra/db-context.js'
 import { z } from 'zod'
+
+import { env } from '../_01_infra/env-data.js'
+import { dbContext } from '../_01_infra/db-context.js'
 import { Meal } from '../_02_models/meal.model.js'
 import { authenticationisRequired } from '../_03_middlewares/authentication-is-required.js'
 
@@ -115,4 +117,13 @@ export async function mealRoutes(app: FastifyInstance) {
         await dbContext(Meal.table).where({'id': id, 'userId': userId}).select().first().delete()
         response.statusCode = 204
     })
+
+    if (env.NODE_ENV == 'test') {
+        app.delete('/byuser/:userId', async (request: FastifyRequest, response: FastifyReply) => {
+            const { userId } = z.object({ userId: z.uuid() }).parse(request.params)
+            console.log('excluindo tudo de ', userId)
+            await dbContext(Meal.table).where({'userId': userId}).select().delete()
+            response.statusCode = 204
+        })
+    }
 }

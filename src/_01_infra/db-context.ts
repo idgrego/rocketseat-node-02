@@ -5,15 +5,6 @@ let auxDbContext: knex.Knex | null = null
 
 switch (env.NODE_ENV) {
   case 'development':
-    auxDbContext = knex({
-      client: 'sqlite3',
-      connection: {
-        filename: env.DATABASE_URL,
-      },
-      useNullAsDefault: true,
-    })
-    break
-
   case 'test':
     auxDbContext = knex({
       client: 'sqlite3',
@@ -22,7 +13,7 @@ switch (env.NODE_ENV) {
       },
       useNullAsDefault: true,
     })
-    break
+    break;
 
   default:
     throw new Error(`Not implemented dbContext for ${env.NODE_ENV} environment`)

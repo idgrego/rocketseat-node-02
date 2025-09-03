@@ -42,7 +42,7 @@ export class Meal {
       date: new Date()
     }
 
-    if (!this.#item.id) this.#item.id = randomUUID()
+    if (!this.#item.id) this.#item.id = randomUUID() // só por garantia. nunca ocorre por causa do zod (schema)
   }
 
   public static get table() { return 'Meals'}
@@ -51,7 +51,8 @@ export class Meal {
   public static get schema() {
     if (!this.#schema) {
       this.#schema = z.object({
-        id: z.uuid().default(randomUUID()),
+        //id: z.uuid().optional(), // se necessário o ID é gerado no construtor
+        id: z.uuid().default(randomUUID), // não é para usar randomUUID(), pois trava o valor
         userId: z.uuid(),
         name: z.string(),
         description: z.string(),
